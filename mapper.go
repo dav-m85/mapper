@@ -136,6 +136,33 @@ func (m *mapper) Columns() []string {
 	return m.cols
 }
 
+// Subset returns a new Mapper with only the provided columns.
+//
+// Columns order of original Mapper is kept.
+func (m *Mapper) Subset(columns ...string) *Mapper {
+	nm := &Mapper{
+		Comma:       m.Comma,
+		Mark:        m.Mark,
+		FieldMapper: m.FieldMapper,
+		cols:        make([]string, 0, len(columns)),
+		fields:      make([]int, 0, len(columns)),
+		target:      m.target,
+	}
+	if len(columns) == 0 {
+		return nm
+	}
+	if fieldSlice(columns).joker() {
+		return m
+	}
+	for i, c := range m.cols {
+		if fieldSlice(columns).index(c) != -1 {
+			nm.cols = append(nm.cols, c)
+			nm.fields = append(nm.fields, m.fields[i])
+		}
+	}
+	return nm
+}
+
 // ColumnsString return a string suitable to be used in a Select query, in the form
 // column1,column2,column3
 // If you need to prefix those columns, use [ColumnsStringPrefix] instead.

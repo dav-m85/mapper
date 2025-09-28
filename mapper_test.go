@@ -88,7 +88,7 @@ func TestMapperWithKey(t *testing.T) {
 	is.Equal(mapper.Columns(), []string{"d_84", "b", "homeaway", "good_bye", "1", "42"})
 }
 
-func TestMapperSubset(t *testing.T) {
+func TestMapperStructSubset(t *testing.T) {
 	is := is.New(t)
 	type M struct {
 		A string
@@ -114,4 +114,32 @@ func TestMapperUnknownField(t *testing.T) {
 	}
 
 	Mapper(M{}, "a", "c")
+}
+
+func TestMapperSubset(t *testing.T) {
+	is := is.New(t)
+	type M struct {
+		A string
+		B string
+		C string
+		D string
+	}
+
+	dut := New(M{}, "*")
+	is.Equal(dut.Columns(), []string{"a", "b", "c", "d"})
+
+	sub := dut.Subset("a", "c")
+	is.Equal(sub.Columns(), []string{"a", "c"})
+
+	sub2 := dut.Subset("c", "a")
+	is.Equal(sub2.Columns(), []string{"a", "c"})
+
+	sub3 := dut.Subset("b")
+	is.Equal(sub3.Columns(), []string{"b"})
+
+	sub4 := dut.Subset()
+	is.Equal(sub4.Columns(), []string{})
+
+	sub5 := dut.Subset("*")
+	is.Equal(sub5.Columns(), []string{"a", "b", "c", "d"})
 }
